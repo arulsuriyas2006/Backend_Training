@@ -1,36 +1,59 @@
 const express =require('express')
 const router = express.Router();
+const mongoose = require('mongoose')
 
-const Book =[
-    {
-        id:1,
-        name:"a book",
-        author:"a author",
-        isAvailable:true
-    },
-    {
-        id:2,
-        name:"b book",
-        author:"b author",
-        isAvailable:false
-    },
-    {
-        id:1,
-        name:"c book",
-        author:"c author",
-        isAvailable:true
+
+const BookSchema = new mongoose.Schema({
+    name:{type:String,required:true},
+    price:{type:Number,required:true,},
+    author:{type:String,required:true}
+}) 
+
+const Book = mongoose.model("book",BookSchema)
+
+
+router.get('/getbooks',async(req,res)=>{
+    try{
+    const book = await Book.find();
+    res.status(200).json({message:"get book successfully",books:book})
+    }catch(err){
+        res.status(500).json({message:"error in fetch data",error:err})
     }
-]
-
-router.get('/getbooks',(req,res)=>{
-    res.status(200).json({message:"get book successfully",book:Book})
 })
 
-router.post('/addbook',(req,res)=>{
-    const {id,name,author,isAvailable} =req.body;
-    const newbook = {id,name,author,isAvailable};
-    Book.push(newbook);
-    res.status(200).json({message:"book added successfully",book:Book})
+router.post('/addbook',async(req,res)=>{
+    try{
+    const {name,price,author} =req.body;
+    const newBook = new Book( {name,price,author});
+    await newBook.save();
+    res.status(200).json({message:"book added successfully",book:newBook})
+    }catch(err){
+        res.status(500).json({message:"book add failed",error:err})
+    }
+})
+
+router.delete("/delete/:id",async(req,res)=>{
+   try{
+    const {id} = req.params;
+    const deleted = await Book.findByIdAndDelete(id);
+    res.status(200).json({message:"book deleted successfully",book:deleted})
+   }catch(err){
+    res.status(500).json({message:"error in book deleted",error:err})
+   }
+})
+
+router.put("/update/:id",async(req,res)=>{
+   try{
+    const {id} = req.params;
+    const deleted = await Book.findByIdAndUpdate(id,{
+        name:req.body.name,
+        price:req.body.price,
+        author:req.body.author
+    });
+    res.status(200).json({message:"book updated successfully",book:deleted})
+   }catch(err){
+    res.status(500).json({message:"error in book updated",error:err})
+   }
 })
 
 module.exports = router;
