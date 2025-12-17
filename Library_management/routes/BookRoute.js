@@ -9,6 +9,9 @@ const Book = require('../model/bookModel')
 router.get('/getbooks',async(req,res)=>{
     try{
     const book = await Book.find();
+        if(!book){
+        return res.status(404).json({message:"books not found",book:book})
+    }
     res.status(200).json({message:"get book successfully",books:book})
     }catch(err){
         res.status(500).json({message:"error in fetch data",error:err})
@@ -19,6 +22,9 @@ router.get('/getbook/:id',async(req,res)=>{
     try{
         const {id} =req.params;
         const book =await Book.findById(id);
+        if(!book){
+        return res.status(404).json({message:"book not found",book:book})
+    }
         res.status(200).json({message:"fetch bookby id successfully",bookbyid:book})
     }catch(err){
         res.status(500).json({message:"error in fetch bookby id",error:err})
@@ -40,6 +46,9 @@ router.delete("/delete/:id",async(req,res)=>{
    try{
     const {id} = req.params;
     const deleted = await Book.findByIdAndDelete(id);
+    if(!deleted){
+        return res.status(404).json({message:"book not found",book:deleted})
+    }
     res.status(200).json({message:"book deleted successfully",book:deleted})
    }catch(err){
     res.status(500).json({message:"error in book deleted",error:err})
@@ -49,12 +58,15 @@ router.delete("/delete/:id",async(req,res)=>{
 router.put("/update/:id",async(req,res)=>{
    try{
     const {id} = req.params;
-    const deleted = await Book.findByIdAndUpdate(id,{
+    const updated = await Book.findByIdAndUpdate(id,{
         name:req.body.name,
         price:req.body.price,
         author:req.body.author
     });
-    res.status(200).json({message:"book updated successfully",book:deleted})
+    if(!updated){
+        return res.status(404).json({message:"book not found",book:updated})
+    }
+    res.status(200).json({message:"book updated successfully",book:updated})
    }catch(err){
     res.status(500).json({message:"error in book updated",error:err})
    }
