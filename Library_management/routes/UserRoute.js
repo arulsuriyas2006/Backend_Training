@@ -13,6 +13,9 @@ router.post('/signup',async(req,res)=>{
      if(!validator.isEmail(email)){
         return res.status(406).json({message:"Invalid Email,Email must be @ symbol",Email:email})
      }
+     if(!validator.isStrongPassword(password)){
+        return res.json({message:"Password is not strong"})
+     }
     const hashPassword = await bcrypt.hash(password,10);
     const signup = new User({
         name,
