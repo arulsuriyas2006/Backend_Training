@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router();
 const mongoose  = require('mongoose')
 const bcrypt = require('bcrypt')
+const validator = require('validator')
 const User =require('../model/userModel')
 
 
@@ -9,7 +10,10 @@ const User =require('../model/userModel')
 router.post('/signup',async(req,res)=>{
     try{
      const {name,email,dept,password}=req.body;
-     const hashPassword = await bcrypt.hash(password,10);
+     if(!validator.isEmail(email)){
+        return res.status(406).json({message:"Invalid Email,Email must be @ symbol",Email:email})
+     }
+    const hashPassword = await bcrypt.hash(password,10);
     const signup = new User({
         name,
         email,
