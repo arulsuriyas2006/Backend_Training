@@ -3,7 +3,8 @@ const UserSchema = new mongoose.Schema({
     name:{type:String,required:true},
     email:{type:String,required:true,unique:true},
     dept:{type:String,required:true},
-    password:{type:String,required:true}
+    password:{type:String,required:true},
+    role:{type:String,required:true,enum:['student','admin']}
 },{timestamps:true}) 
 const User = mongoose.model("user",UserSchema);
 

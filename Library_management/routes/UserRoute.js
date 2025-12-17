@@ -9,7 +9,7 @@ const User =require('../model/userModel')
 
 router.post('/signup',async(req,res)=>{
     try{
-     const {name,email,dept,password}=req.body;
+     const {name,email,dept,password,role}=req.body;
      if(!validator.isEmail(email)){
         return res.status(406).json({message:"Invalid Email,Email must be @ symbol",Email:email})
      }
@@ -21,7 +21,8 @@ router.post('/signup',async(req,res)=>{
         name,
         email,
         dept,
-        password:hashPassword
+        password:hashPassword,
+        role
     })
      await signup.save();
     res.status(201).json({message:"signup successfully",user:signup})
@@ -32,7 +33,10 @@ router.post('/signup',async(req,res)=>{
 
 router.post('/login',async(req,res)=>{
     try{
-     const {email,password}=req.body;
+     const {email,password,role}=req.body;
+     if(role=="admin"){
+        return res.status(406).json({message:"access denied"})
+     }
      const user =await User.findOne({email:email})
 
      console.log(user);
@@ -77,12 +81,13 @@ router.get('/getuser/:id',async(req,res)=>{
 
 router.post("/adduser",async (req,res)=>{
     try{
-    const {name,email,dept,password} =req.body;
+    const {name,email,dept,password,role} =req.body;
     const newUser = new User({
         name,
         email,
         dept,
-        password
+        password,
+        role
     })
      await newUser.save();
     res.status(200).json({message:"user added successfully",users:newUser})

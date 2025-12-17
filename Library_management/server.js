@@ -5,6 +5,7 @@ const app = express()
 const port = 3000
 const UserRoute = require('./routes/UserRoute')
 const BookRoute =require('./routes/BookRoute')
+const AdminRoute =require('./routes/adminRoute')
 app.use(express.json())
 db().then(()=>{
     app.listen(port,()=>{
@@ -15,3 +16,4 @@ db().then(()=>{
 })
 app.use('/users',UserRoute);
 app.use('/books',BookRoute);
+app.use('/admin',AdminRoute)
