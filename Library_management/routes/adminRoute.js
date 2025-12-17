@@ -7,11 +7,10 @@ const User =require('../model/userModel')
 router.post('/login',async(req,res)=>{
     try{
      const {email,password,role}=req.body;
-     if(role=="student"){
+     if(role!="admin"){
         return res.status(406).json({message:"access denied"})
      }
-     const user =await User.findOne({email:email})
-
+     const user =await User.findOne({email:email});
      console.log(user);
      if(!user){
         return res.status(404).json({message:"email not found",user:user})

@@ -34,7 +34,7 @@ router.post('/signup',async(req,res)=>{
 router.post('/login',async(req,res)=>{
     try{
      const {email,password,role}=req.body;
-     if(role=="admin"){
+     if(role!="student"){
         return res.status(406).json({message:"access denied"})
      }
      const user =await User.findOne({email:email})
