@@ -15,11 +15,30 @@ router.post('/signup',async(req,res)=>{
         password
     })
      await signup.save();
-    res.status(200).json({message:"signup successfully",user:signup})
+    res.status(201).json({message:"signup successfully",user:signup})
     }catch(err){
      res.status(500).json({message:"error in signup"})
     }
 })
+
+router.post('/login',async(req,res)=>{
+    try{
+     const {email,password}=req.body;
+     const user =await User.findOne({email:email})
+     console.log(user);
+     if(!user){
+        return res.status(404).json({message:"email not found",user:user})
+     }
+     if(user.password==password){
+     res.status(200).json({message:"login successfully",user:user})
+     }else{
+        res.status(500).json({message:"Invalid credential",user})
+     }
+    }catch(err){
+    res.status(500).json({message:"login failed",error:err})
+    }
+})
+
 router.get('/getusers',async(req,res)=>{
     try{
     const users = await User.find();
