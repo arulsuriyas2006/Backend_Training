@@ -15,6 +15,16 @@ router.get('/getbooks',async(req,res)=>{
     }
 })
 
+router.get('/getbook/:id',async(req,res)=>{
+    try{
+        const {id} =req.params;
+        const book =await Book.findById(id);
+        res.status(200).json({message:"fetch bookby id successfully",bookbyid:book})
+    }catch(err){
+        res.status(500).json({message:"error in fetch bookby id",error:err})
+    }
+})
+
 router.post('/addbook',async(req,res)=>{
     try{
     const {name,price,author} =req.body;
