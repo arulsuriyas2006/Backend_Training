@@ -1,13 +1,8 @@
 const express = require('express')
 const router = express.Router();
 const mongoose  = require('mongoose')
+const User =require('../model/userModel')
 
-const UserSchema = new mongoose.Schema({
-    name:{type:String,required:true},
-    email:{type:String,required:true,unique:true},
-    dept:{type:String,required:true}
-}) 
-const User = mongoose.model("user",UserSchema);
 
 
 
@@ -18,6 +13,16 @@ router.get('/getusers',async(req,res)=>{
     res.status(200).json({message:"users fetch successsfully",users:users})
     }catch(err){
         res.status(500).json({message:"user fetch failed",errpr:err})
+    }
+})
+
+router.get('/getuser/:id',async(req,res)=>{
+    try{
+    const {id} =req.params;
+    const userId = await User.findById(id);
+    res.status(200).json({message:"fetch userbyid successfully",userbyid:userId});
+    }catch(err){
+        res.status(500).json({message:"error in fetch user id",error:err});
     }
 })
 

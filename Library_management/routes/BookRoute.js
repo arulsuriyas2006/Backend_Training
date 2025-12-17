@@ -1,15 +1,9 @@
 const express =require('express')
 const router = express.Router();
 const mongoose = require('mongoose')
+const Book = require('../model/bookModel')
 
 
-const BookSchema = new mongoose.Schema({
-    name:{type:String,required:true},
-    price:{type:Number,required:true,},
-    author:{type:String,required:true}
-}) 
-
-const Book = mongoose.model("book",BookSchema)
 
 
 router.get('/getbooks',async(req,res)=>{
