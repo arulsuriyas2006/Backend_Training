@@ -5,7 +5,21 @@ const User =require('../model/userModel')
 
 
 
-
+router.post('/signup',async(req,res)=>{
+    try{
+     const {name,email,dept,password}=req.body;
+    const signup = new User({
+        name,
+        email,
+        dept,
+        password
+    })
+     await signup.save();
+    res.status(200).json({message:"signup successfully",user:signup})
+    }catch(err){
+     res.status(500).json({message:"error in signup"})
+    }
+})
 router.get('/getusers',async(req,res)=>{
     try{
     const users = await User.find();
@@ -33,11 +47,12 @@ router.get('/getuser/:id',async(req,res)=>{
 
 router.post("/adduser",async (req,res)=>{
     try{
-    const {name,email,dept} =req.body;
+    const {name,email,dept,password} =req.body;
     const newUser = new User({
         name,
         email,
-        dept
+        dept,
+        password
     })
      await newUser.save();
     res.status(200).json({message:"user added successfully",users:newUser})
@@ -64,7 +79,8 @@ router.put('/update/:id',async (req,res)=>{
     const updated = await User.findByIdAndUpdate(id,{
         name:req.body.name,
         email:req.body.email,
-        dept:req.body.dept
+        dept:req.body.dept,
+        password:req.body.password
     });
         if(!updated){
         return res.status(404).json({message:"user not found",users:updated})
