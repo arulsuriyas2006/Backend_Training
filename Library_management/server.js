@@ -6,7 +6,11 @@ const port = 3000
 const UserRoute = require('./routes/UserRoute')
 const BookRoute =require('./routes/BookRoute')
 const AdminRoute =require('./routes/adminRoute')
+const cookieparser = require("cookie-parser");
+const cors = require('cors');
+app.use(cookieparser())
 app.use(express.json())
+app.use(cors())
 db().then(()=>{
     app.listen(port,()=>{
     console.log(`server running on port ${port}`);

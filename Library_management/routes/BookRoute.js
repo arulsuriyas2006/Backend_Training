@@ -1,8 +1,7 @@
 const express =require('express')
 const router = express.Router();
-const mongoose = require('mongoose')
 const Book = require('../model/bookModel')
-
+const auth =require('../middleware/auth.js')
 
 
 
@@ -18,7 +17,7 @@ router.get('/getbooks',async(req,res)=>{
     }
 })
 
-router.get('/getbook/:id',async(req,res)=>{
+router.get('/getbook/:id',auth,async(req,res)=>{
     try{
         const {id} =req.params;
         const book =await Book.findById(id);
@@ -33,17 +32,28 @@ router.get('/getbook/:id',async(req,res)=>{
 
 router.post('/addbook',async(req,res)=>{
     try{
+      // const authRole =req.role;
+      // console.log(authRole);
+      // if(authRole!="admin"){
+      //   return res.json({message:"only access admin only"})
+      
     const {name,price,author} =req.body;
     const newBook = new Book( {name,price,author});
     await newBook.save();
     res.status(200).json({message:"book added successfully",book:newBook})
+  
     }catch(err){
         res.status(500).json({message:"book add failed",error:err})
     }
 })
 
-router.delete("/delete/:id",async(req,res)=>{
+router.delete("/delete/:id",auth,async(req,res)=>{
    try{
+     const authRole =req.role;
+      console.log(authRole);
+      if(authRole!="admin"){
+        return res.json({message:"only access admin only"})
+      }
     const {id} = req.params;
     const deleted = await Book.findByIdAndDelete(id);
     if(!deleted){
@@ -55,8 +65,13 @@ router.delete("/delete/:id",async(req,res)=>{
    }
 })
 
-router.put("/update/:id",async(req,res)=>{
+router.put("/update/:id",auth,async(req,res)=>{
    try{
+     const authRole =req.role;
+      console.log(authRole);
+      if(authRole!="admin"){
+        return res.json({message:"only access admin only"})
+      }
     const {id} = req.params;
     const updated = await Book.findByIdAndUpdate(id,{
         name:req.body.name,

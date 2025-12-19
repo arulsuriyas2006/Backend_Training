@@ -1,15 +1,18 @@
 const express = require('express')
 const router = express.Router();
-const mongoose  = require('mongoose')
 const bcrypt = require('bcrypt')
 const validator = require('validator')
 const User =require('../model/userModel')
+const jwt =require("jsonwebtoken")
+const auth =require('../middleware/auth.js')
+
 
 
 
 router.post('/signup',async(req,res)=>{
     try{
      const {name,email,dept,password,role}=req.body;
+     console.log(name,email,dept,password,role);
      if(!validator.isEmail(email)){
         return res.status(406).json({message:"Invalid Email,Email must be @ symbol",Email:email})
      }
@@ -17,6 +20,7 @@ router.post('/signup',async(req,res)=>{
         return res.json({message:"Password is not strong"})
      }
     const hashPassword = await bcrypt.hash(password,10);
+    console.log(hashPassword);
     const signup = new User({
         name,
         email,
@@ -24,10 +28,11 @@ router.post('/signup',async(req,res)=>{
         password:hashPassword,
         role
     })
+    console.log(signup);
      await signup.save();
     res.status(201).json({message:"signup successfully",user:signup})
     }catch(err){
-     res.status(500).json({message:"error in signup"})
+     res.status(500).json({message:"error in signup",error:err})
     }
 })
 
@@ -45,6 +50,9 @@ router.post('/login',async(req,res)=>{
      }
     const compare =await bcrypt.compare(password,user.password)
      if(compare){
+        const token =jwt.sign({userId:user._id,role:user.role},"BACKEND1812");
+        console.log(token);
+        res.cookie('token',token);
      res.status(200).json({message:"login successfully",user:user})
      }else{
         res.status(500).json({message:"Invalid credential",user})
@@ -54,21 +62,31 @@ router.post('/login',async(req,res)=>{
     }
 })
 
-router.get('/getusers',async(req,res)=>{
+router.get('/getusers', async(req,res)=>{
     try{
+      // const authRole =req.role;
+      // console.log(authRole);
+      // if(authRole!="admin"){
+      //   return res.json({message:"only access admin only"})
+      // }
     const users = await User.find();
     if(!users){
         return res.status(404).json({message:"user not found",users:users})
     }
-    res.status(200).json({message:"users fetch successsfully",users:users})
+    res.status(200).json({message:"users fetch successsfully",data:users})
     }catch(err){
-        res.status(500).json({message:"user fetch failed",errpr:err})
+        res.status(500).json({message:"user fetch failed",error:err})
     }
 })
 
-router.get('/getuser/:id',async(req,res)=>{
+router.get('/getuser/:id',auth,async(req,res)=>{
     try{
+    const authId = req.user;
+    console.log(authId);
     const {id} =req.params;
+    if(authId!=id){
+        return res.json({message:"access denied only view logged user details"})
+    }
     const userId = await User.findById(id);
         if(!userId){
         return res.status(404).json({message:"user not found",users:userId})
@@ -79,8 +97,13 @@ router.get('/getuser/:id',async(req,res)=>{
     }
 })
 
-router.post("/adduser",async (req,res)=>{
+router.post("/adduser",auth,async (req,res)=>{
     try{
+      const authRole =req.role;
+      console.log(authRole);
+      if(authRole!="admin"){
+        return res.json({message:"only access admin only"})
+      }
     const {name,email,dept,password,role} =req.body;
     const newUser = new User({
         name,
@@ -96,8 +119,13 @@ router.post("/adduser",async (req,res)=>{
 }
 })
 
-router.delete('/delete/:id',async (req,res)=>{
+router.delete('/delete/:id',auth,async (req,res)=>{
     try{
+      const authRole =req.role;
+      console.log(authRole);
+      if(authRole!="admin"){
+        return res.json({message:"only access admin only"})
+      }
     const {id} =req.params;
     const deleted = await User.findByIdAndDelete(id);
     if(!deleted){
@@ -108,8 +136,13 @@ router.delete('/delete/:id',async (req,res)=>{
   res.status(500).json({message:"error in user deleted"});
     }
 })
-router.put('/update/:id',async (req,res)=>{
+router.put('/update/:id',auth,async (req,res)=>{
     try{
+      const authRole =req.role;
+      console.log(authRole);
+      if(authRole!="admin"){
+        return res.json({message:"only access admin only"})
+      }
     const {id} =req.params;
     const updated = await User.findByIdAndUpdate(id,{
         name:req.body.name,
@@ -125,5 +158,18 @@ router.put('/update/:id',async (req,res)=>{
   res.status(500).json({message:"error in user updated"});
     }
 })
-
+router.get('/studentcourse/:id',async(req,res)=>{
+    try{
+    const {id} =req.params;
+    console.log(id);
+    const data = await User.findById(id).populate("assignedBook")
+    console.log(data);
+        if(!data){
+        return res.status(404).json({message:"user not found",users:data})
+    }
+    res.status(200).json({message:"fetch userbyid successfully",userbyid:data.assignedBook});
+    }catch(err){
+        res.status(500).json({message:"error in fetch user id",error:err});
+    }
+})
 module.exports =router;
